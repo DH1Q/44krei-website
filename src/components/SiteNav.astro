@@ -1,0 +1,29 @@
+---
+import { siteData } from "../data/site";
+
+interface Props {
+  activePath?: "/" | "/about";
+}
+
+const { activePath = "/" } = Astro.props;
+---
+
+<nav class="site-nav">
+  <div class="container nav-inner">
+    <a href="/" class="brand-link">
+      <img src="/avatar.png" alt="44krei" class="brand-avatar" />
+      <span>{siteData.nav.badgeLabel}</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class:list={["nav-link", { active: activePath === "/" }]}>
+        {siteData.nav.homeLabel}
+      </a>
+      <a href="/about" class:list={["nav-link", { active: activePath === "/about" }]}>
+        {siteData.nav.aboutLabel}
+      </a>
+      <button class="button-shimmer" data-open-contact>
+        {siteData.nav.contactLabel}
+      </button>
+    </div>
+  </div>
+</nav>

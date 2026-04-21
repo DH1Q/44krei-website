@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProjectDetail from "../../components/ProjectDetail.astro";
+import { siteData } from "../../data/site";
+
+export function getStaticPaths() {
+  return siteData.projects
+    .filter((project) => project.kind === "detail")
+    .map((project) => ({
+      params: { slug: project.slug },
+      props: { project },
+    }));
+}
+
+const { project } = Astro.props;
+---
+
+<BaseLayout title={`${project.title} | ${siteData.meta.title}`}>
+  <div class="container">
+    <ProjectDetail project={project} />
+  </div>
+</BaseLayout>

@@ -1,0 +1,47 @@
+<div class="event-horizon-wrap" aria-hidden="true">
+  <canvas id="event-horizon-canvas"></canvas>
+</div>
+
+<script>
+  const canvas = document.getElementById("event-horizon-canvas");
+  const ctx = canvas?.getContext("2d");
+
+  if (canvas && ctx) {
+    let width = 0;
+    let height = 0;
+    let tick = 0;
+
+    const resize = () => {
+      width = canvas.parentElement?.clientWidth ?? 0;
+      height = canvas.parentElement?.clientHeight ?? 0;
+      canvas.width = width;
+      canvas.height = height;
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+      ctx.lineWidth = 1;
+
+      for (let row = 0; row < 7; row += 1) {
+        const y = height * 0.35 + row * 18;
+        ctx.beginPath();
+        for (let x = 0; x <= width; x += 8) {
+          const wave = Math.sin(x * 0.012 + tick * 0.02 + row) * (2 + row * 0.4);
+          const pointY = y + wave;
+          if (x === 0) ctx.moveTo(x, pointY);
+          else ctx.lineTo(x, pointY);
+        }
+        ctx.strokeStyle =
+          row % 2 === 0 ? "rgba(255, 140, 66, 0.11)" : "rgba(10, 10, 10, 0.06)";
+        ctx.stroke();
+      }
+
+      tick += 1;
+      window.requestAnimationFrame(draw);
+    };
+
+    resize();
+    draw();
+    window.addEventListener("resize", resize);
+  }
+</script>

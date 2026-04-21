@@ -1,0 +1,49 @@
+---
+import type { JourneyItem, ProjectItem } from "../data/site";
+
+interface Props {
+  title: string;
+  items: Array<ProjectItem | JourneyItem>;
+  kind: "projects" | "journey";
+}
+
+const { title, items, kind } = Astro.props;
+---
+
+<section class="section-block" id={kind === "projects" ? "projects" : undefined}>
+  <div class:list={["section-title", { first: kind === "projects" }]}>{title}</div>
+  <div>
+    {
+      items.map((item) => {
+        const isProject = "slug" in item;
+        const href = isProject && item.kind === "detail" ? `/projects/${item.slug}/` : undefined;
+
+        return href ? (
+          <a class="list-row" href={href}>
+            <span class="row-icon">{item.icon}</span>
+            <div class="row-main">
+              <span class="row-title">{item.title}</span>
+              <span class="row-description">{item.description}</span>
+            </div>
+            <span class:list={["row-meta", { dimmed: !isProject || item.status === "planned" }]}>
+              {isProject ? item.statusLabel : item.tag}
+            </span>
+            <span class="row-arrow">→</span>
+          </a>
+        ) : (
+          <div class:list={["list-row", "static-row"]}>
+            <span class="row-icon">{item.icon}</span>
+            <div class="row-main">
+              <span class="row-title">{item.title}</span>
+              <span class="row-description">{item.description}</span>
+            </div>
+            <span class:list={["row-meta", { dimmed: !isProject || item.status === "planned" }]}>
+              {isProject ? item.statusLabel : item.tag}
+            </span>
+            <span class="row-arrow">→</span>
+          </div>
+        );
+      })
+    }
+  </div>
+</section>

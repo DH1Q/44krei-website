@@ -1,17 +1,37 @@
 ---
-
+import HeroSection from "../components/HeroSection.astro";
+import ListSection from "../components/ListSection.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { siteData } from "../data/site";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout>
+  <HeroSection />
+  <div class="container">
+    <ListSection title={siteData.home.projectsTitle} items={siteData.projects} kind="projects" />
+    <ListSection title={siteData.home.journeyTitle} items={siteData.journey} kind="journey" />
+    <ListSection title={siteData.home.channelsTitle} items={siteData.channels} kind="journey" />
+
+    <section class="section-block section-padding-bottom">
+      <div class="section-title">{siteData.home.contactTitle}</div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <span class="row-icon">✉</span>
+          <div class="contact-content">
+            <div class="contact-value">{siteData.contact.emailLabel}</div>
+            <div class="contact-hint">{siteData.contact.emailHint}</div>
+          </div>
+          <span class="row-arrow">→</span>
+        </div>
+        <button class="contact-card contact-card-button" data-open-contact>
+          <span class="row-icon">◎</span>
+          <div class="contact-content">
+            <div class="contact-value">{siteData.contact.wechatLabel}</div>
+            <div class="contact-hint">{siteData.contact.wechatHint}</div>
+          </div>
+          <span class="row-arrow">→</span>
+        </button>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

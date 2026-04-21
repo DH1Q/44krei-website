@@ -1,0 +1,11 @@
+---
+import AboutSections from "../components/AboutSections.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { siteData } from "../data/site";
+---
+
+<BaseLayout title={`关于 | ${siteData.meta.title}`} activePath="/about">
+  <div class="container">
+    <AboutSections />
+  </div>
+</BaseLayout>

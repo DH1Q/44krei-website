@@ -1,0 +1,366 @@
+---
+import { siteData } from "../data/site";
+---
+
+<section class="hero-section full-bleed" id="hero">
+  <div class="hero-stream">
+    <canvas id="hero-grid-canvas"></canvas>
+  </div>
+  <div class="hero-glow" id="hero-glow"></div>
+  <div class="container hero-content">
+    <p class="hero-eyebrow">{siteData.home.hero.eyebrow}</p>
+    <h1 class="hero-title">{siteData.home.hero.title}</h1>
+    <p class="hero-subtitle">{siteData.home.hero.description}</p>
+    <button class="hero-cta" data-open-contact>{siteData.home.hero.cta}</button>
+  </div>
+</section>
+
+<script>
+  import { applyPointerImpulse, createGridModel, getNodeIndex } from "../lib/hero-grid";
+
+  const hero = document.getElementById("hero");
+  const glow = document.getElementById("hero-glow");
+  const canvas = document.getElementById("hero-grid-canvas");
+  const ctx = canvas?.getContext("2d");
+
+  if (hero && glow && canvas && ctx) {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    let grid = createGridModel({
+      width: 1,
+      height: 1,
+      columns: 10,
+      rows: 6,
+    });
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+    let running = true;
+    let lastTime = 0;
+    let timeSinceImpulse = 0;
+
+    const damping = 0.978;
+    const returnForce = 0.003;
+    const springK = 0.12;
+    const flashes = [];
+    const springs = [];
+
+    const fadeAt = (x, y) => {
+      const xNorm = x / width;
+      const yNorm = y / height;
+      const left = Math.min(1, xNorm / 0.08);
+      const right = Math.min(1, (1 - xNorm) / 0.08);
+      const top = Math.min(1, yNorm / 0.1);
+      const bottom = Math.min(1, (1 - yNorm) / 0.18);
+      return left * right * top * bottom;
+    };
+
+    const tensionColor = (tension) => {
+      const value = Math.max(0, Math.min(1, tension));
+
+      if (value < 0.2) {
+        return { r: 210, g: 178, b: 146, a: 0.12 + value * 0.18 };
+      }
+      if (value < 0.55) {
+        const factor = (value - 0.2) / 0.35;
+        return {
+          r: 255,
+          g: 162 - factor * 24,
+          b: 102 - factor * 30,
+          a: 0.18 + factor * 0.24,
+        };
+      }
+
+      const factor = (value - 0.55) / 0.45;
+      return {
+        r: 246,
+        g: 122 - factor * 18,
+        b: 44,
+        a: 0.38 + factor * 0.22,
+      };
+    };
+
+    const rebuildSprings = () => {
+      springs.length = 0;
+      for (let row = 0; row < grid.rows; row += 1) {
+        for (let column = 0; column < grid.columns; column += 1) {
+          const index = getNodeIndex(column, row, grid.columns);
+          if (column < grid.columns - 1) {
+            springs.push(index, getNodeIndex(column + 1, row, grid.columns), grid.spacingX);
+          }
+          if (row < grid.rows - 1) {
+            springs.push(index, getNodeIndex(column, row + 1, grid.columns), grid.spacingY);
+          }
+        }
+      }
+    };
+
+    const resize = () => {
+      width = canvas.parentElement?.clientWidth ?? 0;
+      height = canvas.parentElement?.clientHeight ?? 0;
+      canvas.width = width;
+      canvas.height = height;
+
+      grid = createGridModel({
+        width,
+        height,
+        columns: width < 640 ? 22 : 38,
+        rows: width < 640 ? 14 : 24,
+      });
+      rebuildSprings();
+    };
+
+    const injectEdgeImpulse = () => {
+      const edge = Math.floor(Math.random() * 4);
+      const regionSize = 3 + Math.floor(Math.random() * 4);
+      const strength = 3.2 + Math.random() * 2.2;
+      let flashX = width * 0.5;
+      let flashY = height * 0.5;
+
+      if (edge === 0) {
+        const start = Math.floor(Math.random() * Math.max(1, grid.columns - regionSize));
+        flashX = (start + regionSize * 0.5) * grid.spacingX;
+        flashY = 0;
+        for (let column = start; column < start + regionSize && column < grid.columns; column += 1) {
+          const factor = 1 - Math.abs(column - start - regionSize * 0.5) / (regionSize * 0.5);
+          grid.velY[getNodeIndex(column, 0, grid.columns)] += strength * factor * factor;
+        }
+      } else if (edge === 1) {
+        const start = Math.floor(Math.random() * Math.max(1, grid.rows - regionSize));
+        flashX = width;
+        flashY = (start + regionSize * 0.5) * grid.spacingY;
+        for (let row = start; row < start + regionSize && row < grid.rows; row += 1) {
+          const factor = 1 - Math.abs(row - start - regionSize * 0.5) / (regionSize * 0.5);
+          grid.velX[getNodeIndex(grid.columns - 1, row, grid.columns)] -= strength * factor * factor;
+        }
+      } else if (edge === 2) {
+        const start = Math.floor(Math.random() * Math.max(1, grid.columns - regionSize));
+        flashX = (start + regionSize * 0.5) * grid.spacingX;
+        flashY = height;
+        for (let column = start; column < start + regionSize && column < grid.columns; column += 1) {
+          const factor = 1 - Math.abs(column - start - regionSize * 0.5) / (regionSize * 0.5);
+          grid.velY[getNodeIndex(column, grid.rows - 1, grid.columns)] -= strength * factor * factor;
+        }
+      } else {
+        const start = Math.floor(Math.random() * Math.max(1, grid.rows - regionSize));
+        flashX = 0;
+        flashY = (start + regionSize * 0.5) * grid.spacingY;
+        for (let row = start; row < start + regionSize && row < grid.rows; row += 1) {
+          const factor = 1 - Math.abs(row - start - regionSize * 0.5) / (regionSize * 0.5);
+          grid.velX[getNodeIndex(0, row, grid.columns)] += strength * factor * factor;
+        }
+      }
+
+      flashes.push({ x: flashX, y: flashY, life: 1, ring: 1 });
+    };
+
+    const injectPointer = (clientX, clientY, strength = 4.2, radiusMultiplier = 2.55) => {
+      const rect = canvas.getBoundingClientRect();
+      const pointerX = clientX - rect.left;
+      const pointerY = clientY - rect.top;
+      applyPointerImpulse(grid, {
+        pointerX,
+        pointerY,
+        strength,
+        radiusMultiplier,
+      });
+      flashes.push({ x: pointerX, y: pointerY, life: 1, ring: 1 });
+    };
+
+    const simulate = () => {
+      if (prefersReducedMotion) return;
+
+      const springCount = springs.length / 3;
+      for (let spring = 0; spring < springCount; spring += 1) {
+        const base = spring * 3;
+        const aIndex = springs[base];
+        const bIndex = springs[base + 1];
+        const restLength = springs[base + 2];
+        const dx = grid.posX[bIndex] - grid.posX[aIndex];
+        const dy = grid.posY[bIndex] - grid.posY[aIndex];
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < 0.001) continue;
+
+        const force = (springK * (distance - restLength)) / distance;
+        const fx = dx * force;
+        const fy = dy * force;
+        grid.velX[aIndex] += fx;
+        grid.velY[aIndex] += fy;
+        grid.velX[bIndex] -= fx;
+        grid.velY[bIndex] -= fy;
+      }
+
+      for (let index = 0; index < grid.nodeCount; index += 1) {
+        grid.velX[index] += (grid.restX[index] - grid.posX[index]) * returnForce;
+        grid.velY[index] += (grid.restY[index] - grid.posY[index]) * returnForce;
+        grid.velX[index] *= damping;
+        grid.velY[index] *= damping;
+        grid.posX[index] += grid.velX[index];
+        grid.posY[index] += grid.velY[index];
+      }
+    };
+
+    const render = (now) => {
+      if (!running) {
+        window.requestAnimationFrame(render);
+        return;
+      }
+
+      const time = now * 0.001;
+      const dt = lastTime === 0 ? 0.016 : Math.min(time - lastTime, 0.1);
+      lastTime = time;
+      timeSinceImpulse += dt;
+
+      if (!prefersReducedMotion && timeSinceImpulse > 2.4 + Math.random() * 0.8) {
+        injectEdgeImpulse();
+        timeSinceImpulse = 0;
+      }
+
+      simulate();
+      ctx.clearRect(0, 0, width, height);
+
+      const averageSpacing = (grid.spacingX + grid.spacingY) * 0.5;
+      const tensionScale = 1 / (averageSpacing * 0.34);
+      const springCount = springs.length / 3;
+
+      for (let spring = 0; spring < springCount; spring += 1) {
+        const base = spring * 3;
+        const aIndex = springs[base];
+        const bIndex = springs[base + 1];
+        const restLength = springs[base + 2];
+        const ax = grid.posX[aIndex];
+        const ay = grid.posY[aIndex];
+        const bx = grid.posX[bIndex];
+        const by = grid.posY[bIndex];
+        const midFade = fadeAt((ax + bx) * 0.5, (ay + by) * 0.5);
+
+        if (midFade < 0.01) continue;
+
+        const dx = bx - ax;
+        const dy = by - ay;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const tension = Math.abs(distance - restLength) * tensionScale;
+        const color = tensionColor(tension);
+        const glowAlpha = Math.max(0.02, color.a * midFade * 0.48);
+        const coreAlpha = Math.max(0.05, color.a * midFade * 0.82);
+
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(bx, by);
+        ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${glowAlpha})`;
+        ctx.lineWidth = 1.1 + tension * 1.7;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(ax, ay);
+        ctx.lineTo(bx, by);
+        ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${coreAlpha})`;
+        ctx.lineWidth = 0.42 + tension * 0.45;
+        ctx.stroke();
+      }
+
+      for (let index = 0; index < grid.nodeCount; index += 1) {
+        const speed = Math.sqrt(
+          grid.velX[index] * grid.velX[index] + grid.velY[index] * grid.velY[index],
+        );
+        const brightness = Math.min(1, speed * 0.15);
+        const fade = fadeAt(grid.posX[index], grid.posY[index]);
+        if (brightness < 0.02 || fade < 0.01) continue;
+
+        if (speed > 2.9) {
+          const bloom = Math.min(1, (speed - 2.9) / 13);
+          ctx.beginPath();
+          ctx.arc(grid.posX[index], grid.posY[index], 1.1 + bloom * 2.8, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 140, 66, ${bloom * 0.11 * fade})`;
+          ctx.fill();
+        }
+
+        ctx.beginPath();
+        ctx.arc(grid.posX[index], grid.posY[index], 0.34 + brightness * 0.72, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 140, 66, ${(0.05 + brightness * 0.24) * fade})`;
+        ctx.fill();
+      }
+
+      for (let index = flashes.length - 1; index >= 0; index -= 1) {
+        const flash = flashes[index];
+        flash.life -= dt * 1.8;
+        flash.ring -= dt * 1.6;
+        if (flash.life <= 0) {
+          flashes.splice(index, 1);
+          continue;
+        }
+
+        const fade = fadeAt(flash.x, flash.y);
+        const radius = 9 + (1 - flash.life) * 34;
+        const alpha = flash.life * flash.life * 0.16 * fade;
+        const gradient = ctx.createRadialGradient(
+          flash.x,
+          flash.y,
+          0,
+          flash.x,
+          flash.y,
+          radius,
+        );
+        gradient.addColorStop(0, `rgba(255, 184, 108, ${alpha})`);
+        gradient.addColorStop(0.42, `rgba(255, 140, 66, ${alpha * 0.4})`);
+        gradient.addColorStop(1, "rgba(255, 120, 40, 0)");
+        ctx.beginPath();
+        ctx.arc(flash.x, flash.y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+      }
+
+      frame += 1;
+      window.requestAnimationFrame(render);
+    };
+
+    const updateGlow = (clientX, clientY) => {
+      const rect = hero.getBoundingClientRect();
+      glow.style.left = `${clientX - rect.left}px`;
+      glow.style.top = `${clientY - rect.top}px`;
+      glow.classList.add("active");
+    };
+
+    const onPointerMove = (event) => {
+      updateGlow(event.clientX, event.clientY);
+      injectPointer(event.clientX, event.clientY, 2.6, 2.05);
+    };
+
+    const onTouchMove = (event) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+      updateGlow(touch.clientX, touch.clientY);
+      injectPointer(touch.clientX, touch.clientY, 2.4, 2.05);
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        running = entries[0]?.isIntersecting ?? true;
+      },
+      { threshold: 0 },
+    );
+
+    resize();
+    injectEdgeImpulse();
+    observer.observe(hero);
+    window.requestAnimationFrame(render);
+
+    hero.addEventListener("mousemove", onPointerMove);
+    hero.addEventListener("mouseleave", () => glow.classList.remove("active"));
+    hero.addEventListener("mousedown", (event) => {
+      updateGlow(event.clientX, event.clientY);
+      injectPointer(event.clientX, event.clientY, 4.6, 2.55);
+    });
+    hero.addEventListener("touchmove", onTouchMove, { passive: true });
+    hero.addEventListener("touchend", () => glow.classList.remove("active"));
+    window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && running) {
+        lastTime = 0;
+        window.requestAnimationFrame(render);
+      }
+    });
+  }
+</script>

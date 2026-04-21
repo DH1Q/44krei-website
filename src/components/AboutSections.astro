@@ -1,0 +1,67 @@
+---
+import { siteData } from "../data/site";
+---
+
+<section class="about-shell">
+  <a href="/" class="back-link">返回</a>
+  <div class="profile-header">
+    <img src="/avatar.png" alt="44krei" class="profile-avatar" />
+    <div>
+      <div class="section-title first compact">关于我</div>
+      <h1 class="profile-title">邓又齐 / 44krei</h1>
+    </div>
+  </div>
+
+  <section class="section-block compact-top">
+    <p class="page-copy">{siteData.about.intro}</p>
+  </section>
+
+  <section class="section-block">
+    <div class="section-title">我在做什么</div>
+    <div class="simple-stack">
+      {
+        siteData.about.whatIDo.map((item) => (
+          <div class="list-row static-row">
+            <span class="row-icon">•</span>
+            <div class="row-main">
+              <span class="row-title">{item}</span>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="section-title">里程碑</div>
+    <div class="simple-stack">
+      {
+        siteData.about.milestones.map((item) => (
+          <div class="list-row static-row">
+            <span class="row-icon">{item.icon}</span>
+            <div class="row-main">
+              <span class="row-title">{item.title}</span>
+              <span class="row-description">{item.description}</span>
+            </div>
+            <span class="row-meta">{item.tag}</span>
+            <span class="row-arrow">→</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section-block">
+    <div class="section-title">常见问题</div>
+    <div class="faq-list">
+      {
+        siteData.about.faq.map((item) => (
+          <div class="faq-item">
+            <div class="faq-question">{item.question}</div>
+            <div class="faq-answer">{item.answer}</div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</section>

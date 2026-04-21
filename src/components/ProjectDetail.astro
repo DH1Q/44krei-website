@@ -1,0 +1,56 @@
+---
+import type { ProjectItem } from "../data/site";
+
+interface Props {
+  project: ProjectItem;
+}
+
+const { project } = Astro.props;
+const detail = project.detail;
+---
+
+<section class="detail-shell">
+  <a href="/" class="back-link">返回首页</a>
+  <div class="detail-hero">
+    <div class="hero-eyebrow">项目详情</div>
+    <h1 class="detail-title">{project.title}</h1>
+    <p class="detail-summary">{detail?.summary}</p>
+  </div>
+
+  <div class="detail-stats">
+    {
+      detail?.metrics.map((metric) => (
+        <div class="detail-stat">
+          <div class="detail-stat-value">{metric.value}</div>
+          <div class="detail-stat-label">{metric.label}</div>
+        </div>
+      ))
+    }
+  </div>
+
+  <section class="section-block compact-top">
+    <div class="section-title first">当前阶段</div>
+    <p class="page-copy">{detail?.stage}</p>
+  </section>
+
+  <section class="section-block">
+    <div class="section-title">关键要点</div>
+    <div class="simple-stack">
+      {
+        detail?.points.map((point, index) => (
+          <div class="list-row static-row">
+            <span class="row-icon">{index + 1}</span>
+            <div class="row-main">
+              <span class="row-title">{point}</span>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section-block detail-closing">
+    <div class="section-title">结语</div>
+    <p class="page-copy">{detail?.closing}</p>
+  </section>
+</section>

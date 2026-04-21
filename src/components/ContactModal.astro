@@ -1,0 +1,55 @@
+---
+import { siteData } from "../data/site";
+---
+
+<div class="contact-modal" id="contact-modal" data-contact-modal>
+  <div class="contact-modal-card">
+    <button class="contact-modal-close" data-close-contact aria-label="关闭联系弹窗">
+      ✕
+    </button>
+    <div class="contact-modal-kicker">联系</div>
+    <div class="contact-modal-title">{siteData.contact.modalTitle}</div>
+    <div class="contact-modal-qr">
+      <img
+        src="/wechat-qr.png"
+        alt="微信二维码"
+        loading="eager"
+        decoding="async"
+      />
+    </div>
+    <div class="contact-modal-hint">{siteData.contact.modalHint}</div>
+    <button
+      class="contact-modal-copy"
+      data-copy-contact
+      data-copy-value={siteData.contact.copyValue}
+      data-copy-label={siteData.contact.modalCopy}
+    >
+      {siteData.contact.modalCopy}
+    </button>
+  </div>
+</div>
+
+<script>
+  const modal = document.querySelector("[data-contact-modal]");
+  const openers = document.querySelectorAll("[data-open-contact]");
+  const closers = document.querySelectorAll("[data-close-contact]");
+  const copyButton = document.querySelector("[data-copy-contact]");
+
+  const closeModal = () => modal?.classList.remove("active");
+  const openModal = () => modal?.classList.add("active");
+
+  openers.forEach((element) => element.addEventListener("click", openModal));
+  closers.forEach((element) => element.addEventListener("click", closeModal));
+  modal?.addEventListener("click", (event) => {
+    if (event.target === modal) closeModal();
+  });
+  copyButton?.addEventListener("click", async () => {
+    const copyValue = copyButton.getAttribute("data-copy-value") ?? "";
+    const copyLabel = copyButton.getAttribute("data-copy-label") ?? "";
+    await navigator.clipboard.writeText(copyValue);
+    copyButton.textContent = "已复制微信号";
+    window.setTimeout(() => {
+      copyButton.textContent = copyLabel;
+    }, 1800);
+  });
+</script>
