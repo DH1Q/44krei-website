@@ -2,11 +2,11 @@
 title: "我的 AI 笔记系统"
 slug: ai-note-system
 contentType: article
-statusLabel: "草稿"
-status: ongoing
+statusLabel: "已发布"
+status: published
 description: "Obsidian 和 Get 笔记搭在一起很丝滑，一个负责沉淀，一个负责收集，中间再用…"
 summary: "这套系统好用，不是因为某个工具特别万能，而是因为 Obsidian 和 Get 笔记分工很清楚，搭起来之后非常顺。"
-stage: "当前处于草稿阶段。"
+stage: "当前处于已发布阶段。"
 metrics: []
 keyPoints:
   - "本地沉淀：Obsidian"
