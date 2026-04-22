@@ -6,21 +6,21 @@ statusLabel: "MVP"
 status: ongoing
 description: "一个面向海外手帐用户的 AI 内页生成与作品分享平台。"
 summary: "用 AI 快速生成可打印的手帐内页卡片，并让用户在 Gallery 里发现、复用和再创作别人的作品。"
-stage: "结构和功能边界已经明确，处于 MVP 推进阶段。"
-metrics: 
-  - label: "方向"
-    value: "AI × 手帐"
-  - label: "形态"
-    value: "Web"
-  - label: "重点"
-    value: "Generator + Gallery"
+stage: "当前处于MVP阶段。"
+metrics: []
 keyPoints:
-  - "目标不是做一个花哨工具，而是先打通生成、预览、导出、分享这条闭环。"
-  - "参考 Leonardo.ai、Canva 和 Pinterest，但会更垂直地服务手帐场景。"
-  - "项目很能代表我现在的做事方式：从兴趣、美感和实际需求出发，慢慢做成产品。"
-closing: "这是一个还在长出来的项目，但方向已经很清楚了。"
+  - "方向：AI × 手帐"
+  - "形态：Web"
+  - "重点：Generator + Gallery"
+closing: "现阶段最重要的不是堆功能，而是把 MVP 做到可验证。只要用户能完成从生成到分享的闭环，后面的模板扩展、社区机制和商业化路径都才真正有讨论基础。"
 updated: 2026-04-22
 ---
+## 指标卡
+
+- 方向：AI × 手帐
+- 形态：Web
+- 重点：Generator + Gallery
+
 ## 项目定位
 
 HandiCard 面向的是海外手帐用户中那批既有审美诉求、也有分享欲望的人。这个方向的重点不是做一个“什么都能生成”的大模型玩具，而是围绕真实使用场景，把生成、预览、导出、分享这一条链路先打通。
