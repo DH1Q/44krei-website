@@ -2,12 +2,10 @@ import { describe, expect, it } from "vitest";
 import { siteData } from "../src/data/site";
 
 describe("siteData", () => {
-  it("provides homepage hero copy and project entries", () => {
+  it("provides homepage hero copy", () => {
     expect(siteData.home.hero.eyebrow).toBeTruthy();
     expect(siteData.home.hero.title).toBeTruthy();
     expect(siteData.home.hero.description).toBeTruthy();
-    expect(siteData.projects.length).toBeGreaterThanOrEqual(3);
-    expect(siteData.projects.every((project) => project.slug)).toBe(true);
   });
 
   it("provides about page sections and FAQ entries", () => {
@@ -17,15 +15,11 @@ describe("siteData", () => {
     expect(siteData.about.faq.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("provides detail data for featured project pages", () => {
-    expect(
-      siteData.projects.filter((project) => project.kind === "detail").length,
-    ).toBeGreaterThanOrEqual(3);
-    expect(
-      siteData.projects
-        .filter((project) => project.kind === "detail")
-        .every((project) => project.detail?.summary && project.detail?.points.length),
-    ).toBe(true);
+  it("keeps labels for the homepage sections", () => {
+    expect(siteData.home.projectsTitle).toBeTruthy();
+    expect(siteData.home.journeyTitle).toBeTruthy();
+    expect(siteData.home.channelsTitle).toBeTruthy();
+    expect(siteData.home.contactTitle).toBeTruthy();
   });
 
   it("provides direct contact info and social handles", () => {

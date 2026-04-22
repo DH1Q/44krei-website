@@ -1,56 +1,78 @@
 ---
-import type { ProjectItem } from "../data/site";
+import type { CollectionEntry } from "astro:content";
+import { formatUpdatedLabel, getContentTypeLabel } from "../lib/site-content";
 
 interface Props {
-  project: ProjectItem;
+  entry: CollectionEntry<"site">;
+  Content: unknown;
 }
 
-const { project } = Astro.props;
-const detail = project.detail;
+const { entry, Content } = Astro.props;
+const detail = entry.data;
+const detailTypeLabel = getContentTypeLabel(detail.contentType);
 ---
 
 <section class="detail-shell">
   <a href="/" class="back-link">返回首页</a>
   <div class="detail-hero">
-    <div class="hero-eyebrow">项目详情</div>
-    <h1 class="detail-title">{project.title}</h1>
-    <p class="detail-summary">{detail?.summary}</p>
+    <div class="hero-eyebrow">{detailTypeLabel}详情</div>
+    <h1 class="detail-title">{detail.title}</h1>
+    <div class="detail-meta-line">
+      <span class="detail-type-chip">{detailTypeLabel}</span>
+      <span class="detail-updated">{formatUpdatedLabel(detail.updated)}</span>
+    </div>
+    <p class="detail-summary">{detail.summary}</p>
   </div>
 
-  <div class="detail-stats">
-    {
-      detail?.metrics.map((metric) => (
-        <div class="detail-stat">
-          <div class="detail-stat-value">{metric.value}</div>
-          <div class="detail-stat-label">{metric.label}</div>
-        </div>
-      ))
-    }
-  </div>
+  {
+    detail.metrics.length > 0 && (
+      <div class="detail-stats">
+        {
+          detail.metrics.map((metric) => (
+            <div class="detail-stat">
+              <div class="detail-stat-value">{metric.value}</div>
+              <div class="detail-stat-label">{metric.label}</div>
+            </div>
+          ))
+        }
+      </div>
+    )
+  }
 
   <section class="section-block compact-top">
     <div class="section-title first">当前阶段</div>
-    <p class="page-copy">{detail?.stage}</p>
+    <p class="page-copy">{detail.stage}</p>
   </section>
 
+  {
+    detail.keyPoints.length > 0 && (
+      <section class="section-block">
+        <div class="section-title">关键要点</div>
+        <div class="simple-stack">
+          {
+            detail.keyPoints.map((point, index) => (
+              <div class="list-row static-row">
+                <span class="row-icon">{index + 1}</span>
+                <div class="row-main">
+                  <span class="row-title">{point}</span>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+    )
+  }
+
   <section class="section-block">
-    <div class="section-title">关键要点</div>
-    <div class="simple-stack">
-      {
-        detail?.points.map((point, index) => (
-          <div class="list-row static-row">
-            <span class="row-icon">{index + 1}</span>
-            <div class="row-main">
-              <span class="row-title">{point}</span>
-            </div>
-          </div>
-        ))
-      }
-    </div>
+    <div class="section-title">{detail.contentType === "article" ? "正文" : "项目展开"}</div>
+    <article class="content-body">
+      <Content />
+    </article>
   </section>
 
   <section class="section-block detail-closing">
     <div class="section-title">结语</div>
-    <p class="page-copy">{detail?.closing}</p>
+    <p class="page-copy">{detail.closing}</p>
   </section>
 </section>

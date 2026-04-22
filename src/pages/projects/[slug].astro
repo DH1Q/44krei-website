@@ -1,22 +1,24 @@
 ---
+import { getCollection, render, type CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ProjectDetail from "../../components/ProjectDetail.astro";
 import { siteData } from "../../data/site";
 
-export function getStaticPaths() {
-  return siteData.projects
-    .filter((project) => project.kind === "detail")
-    .map((project) => ({
-      params: { slug: project.slug },
-      props: { project },
-    }));
+export async function getStaticPaths() {
+  const entries = await getCollection("site");
+
+  return entries.map((entry) => ({
+    params: { slug: entry.data.slug },
+    props: { entry },
+  }));
 }
 
-const { project } = Astro.props;
+const { entry } = Astro.props as { entry: CollectionEntry<"site"> };
+const { Content } = await render(entry);
 ---
 
-<BaseLayout title={`${project.title} | ${siteData.meta.title}`}>
+<BaseLayout title={`${entry.data.title} | ${siteData.meta.title}`}>
   <div class="container">
-    <ProjectDetail project={project} />
+    <ProjectDetail entry={entry} Content={Content} />
   </div>
 </BaseLayout>

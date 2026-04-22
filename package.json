@@ -10,10 +10,12 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
+    "sync:obsidian": "node scripts/sync-obsidian-site-content.mjs",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.1.8"
+    "astro": "^6.1.8",
+    "pinyin-pro": "^3.28.1"
   },
   "devDependencies": {
     "vitest": "^4.1.4"

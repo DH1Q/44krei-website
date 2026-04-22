@@ -1,14 +1,26 @@
 ---
+import { getCollection } from "astro:content";
 import HeroSection from "../components/HeroSection.astro";
 import ListSection from "../components/ListSection.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { siteData } from "../data/site";
+
+const projectItems = (await getCollection("site"))
+  .sort((left, right) => right.data.updated.localeCompare(left.data.updated))
+  .map((entry) => ({
+    slug: entry.data.slug,
+    title: entry.data.title,
+    description: entry.data.description,
+    statusLabel: entry.data.statusLabel,
+    contentType: entry.data.contentType,
+    updated: entry.data.updated,
+  }));
 ---
 
 <BaseLayout>
   <HeroSection />
   <div class="container">
-    <ListSection title={siteData.home.projectsTitle} items={siteData.projects} kind="projects" />
+    <ListSection title={siteData.home.projectsTitle} items={projectItems} kind="projects" />
     <ListSection title={siteData.home.journeyTitle} items={siteData.journey} kind="journey" />
     <ListSection title={siteData.home.channelsTitle} items={siteData.channels} kind="journey" />
 

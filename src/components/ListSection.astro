@@ -1,9 +1,20 @@
 ---
-import type { JourneyItem, ProjectItem } from "../data/site";
+import type { JourneyItem } from "../data/site";
+import type { SiteContentType } from "../lib/site-content";
+import { getListEntryMeta } from "../lib/site-content";
+
+interface SiteListItem {
+  slug: string;
+  title: string;
+  description: string;
+  statusLabel: string;
+  contentType: SiteContentType;
+  updated: string;
+}
 
 interface Props {
   title: string;
-  items: Array<ProjectItem | JourneyItem>;
+  items: Array<SiteListItem | JourneyItem>;
   kind: "projects" | "journey";
 }
 
@@ -16,18 +27,23 @@ const { title, items, kind } = Astro.props;
     {
       items.map((item) => {
         const isProject = "slug" in item;
-        const href = isProject && item.kind === "detail" ? `/projects/${item.slug}/` : undefined;
+        const href = isProject ? `/projects/${item.slug}/` : undefined;
+        const listMeta = isProject
+          ? getListEntryMeta({
+              contentType: item.contentType,
+              updated: item.updated,
+            })
+          : null;
 
         return href ? (
           <a class="list-row" href={href}>
-            <span class="row-icon">{item.icon}</span>
+            <span class="row-icon">{listMeta?.icon}</span>
             <div class="row-main">
               <span class="row-title">{item.title}</span>
               <span class="row-description">{item.description}</span>
+              <span class="row-context">{listMeta?.label}</span>
             </div>
-            <span class:list={["row-meta", { dimmed: !isProject || item.status === "planned" }]}>
-              {isProject ? item.statusLabel : item.tag}
-            </span>
+            <span class="row-meta">{item.statusLabel}</span>
             <span class="row-arrow">→</span>
           </a>
         ) : (
