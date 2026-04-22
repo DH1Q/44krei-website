@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "astro": "^6.1.8",
-    "pinyin-pro": "^3.28.1"
+    "pinyin-pro": "^3.28.1",
+    "yaml": "^2.8.3"
   },
   "devDependencies": {
     "vitest": "^4.1.4"

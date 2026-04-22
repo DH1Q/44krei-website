@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pinyin } from "pinyin-pro";
+import YAML from "yaml";
 
 export const DEFAULT_OBSIDIAN_SOURCE_DIR =
   "/Users/100jin/44krei/DH1Q/02-项目库/个人网站/网站发布";
@@ -9,21 +10,6 @@ export const DEFAULT_ASSET_DIR = path.resolve(process.cwd(), "public/project-ass
 
 const DEFAULT_CLOSING = "内容已从 Obsidian 同步到网站，后续可以继续补充。";
 
-function parseScalarValue(rawValue) {
-  const value = rawValue.trim();
-
-  if (value === "true") return true;
-  if (value === "false") return false;
-  if (
-    (value.startsWith('"') && value.endsWith('"')) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
-    return value.slice(1, -1);
-  }
-
-  return value;
-}
-
 export function parseFrontmatterDocument(source) {
   const match = source.match(/^---\n([\s\S]*?)\n---\n?/);
 
@@ -31,22 +17,8 @@ export function parseFrontmatterDocument(source) {
     return { data: {}, body: source.trim() };
   }
 
-  const data = {};
-
-  for (const line of match[1].split("\n")) {
-    if (!line.includes(":")) continue;
-
-    const separatorIndex = line.indexOf(":");
-    const key = line.slice(0, separatorIndex).trim();
-    const rawValue = line.slice(separatorIndex + 1);
-
-    if (!key) continue;
-
-    data[key] = parseScalarValue(rawValue);
-  }
-
   return {
-    data,
+    data: YAML.parse(match[1]) ?? {},
     body: source.slice(match[0].length).trim(),
   };
 }
@@ -123,6 +95,43 @@ function escapeYamlString(value) {
   return JSON.stringify(value ?? "");
 }
 
+function formatFrontmatterValue(value, indentLevel = 0) {
+  const indent = "  ".repeat(indentLevel);
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return `${indent}[]`;
+
+    return value
+      .map((item) => {
+        if (typeof item === "object" && item !== null && !Array.isArray(item)) {
+          const entries = Object.entries(item);
+          const [firstKey, firstValue] = entries[0] ?? [];
+
+          if (!firstKey) return `${indent}- {}`;
+
+          const lines = [`${indent}- ${firstKey}: ${formatFrontmatterScalar(firstValue)}`];
+          for (const [key, nestedValue] of entries.slice(1)) {
+            lines.push(`${indent}  ${key}: ${formatFrontmatterScalar(nestedValue)}`);
+          }
+          return lines.join("\n");
+        }
+
+        return `${indent}- ${formatFrontmatterScalar(item)}`;
+      })
+      .join("\n");
+  }
+
+  return `${indent}${formatFrontmatterScalar(value)}`;
+}
+
+function formatFrontmatterScalar(value) {
+  if (value === null || value === undefined) return '""';
+  if (typeof value === "string") return escapeYamlString(value);
+  if (typeof value === "boolean") return value ? "true" : "false";
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value);
+}
+
 function buildContentFile(entry) {
   const frontmatterLines = [
     "---",
@@ -134,9 +143,11 @@ function buildContentFile(entry) {
     `description: ${escapeYamlString(entry.description)}`,
     `summary: ${escapeYamlString(entry.summary)}`,
     `stage: ${escapeYamlString(entry.stage)}`,
-    "metrics: []",
+    `metrics: ${
+      entry.metrics.length > 0 ? `\n${formatFrontmatterValue(entry.metrics, 1)}` : "[]"
+    }`,
     entry.keyPoints.length > 0
-      ? `keyPoints:\n${entry.keyPoints.map((point) => `  - ${escapeYamlString(point)}`).join("\n")}`
+      ? `keyPoints:\n${formatFrontmatterValue(entry.keyPoints, 1)}`
       : "keyPoints: []",
     `closing: ${escapeYamlString(entry.closing)}`,
     `updated: ${entry.updated}`,
@@ -192,6 +203,23 @@ async function rewriteBodyImages(body, { sourceDir, assetDir, slug }) {
   return nextBody;
 }
 
+function normalizeMetrics(metrics) {
+  if (!Array.isArray(metrics)) return [];
+
+  return metrics
+    .filter(
+      (metric) =>
+        metric &&
+        typeof metric === "object" &&
+        typeof metric.label === "string" &&
+        typeof metric.value === "string",
+    )
+    .map((metric) => ({
+      label: metric.label,
+      value: metric.value,
+    }));
+}
+
 function createEntryFromNote(note, now) {
   const paragraphs = getTextParagraphs(note.body);
   const title = note.data.title || note.filename.replace(/\.md$/i, "");
@@ -211,12 +239,18 @@ function createEntryFromNote(note, now) {
     description: summarize(note.data.description || summary, 44),
     summary,
     stage: note.data.stage || `当前处于${statusLabel}阶段。`,
-    keyPoints: extractKeyPoints(note.body),
+    metrics: normalizeMetrics(note.data.metrics),
+    keyPoints:
+      Array.isArray(note.data.keyPoints) && note.data.keyPoints.every((item) => typeof item === "string")
+        ? note.data.keyPoints
+        : extractKeyPoints(note.body),
     closing,
     updated:
-      typeof note.data.updated === "string" && note.data.updated
+      typeof note.data.updated === "string"
         ? note.data.updated
-        : now.toISOString().slice(0, 10),
+        : note.data.updated instanceof Date
+          ? note.data.updated.toISOString().slice(0, 10)
+          : now.toISOString().slice(0, 10),
   };
 }
 

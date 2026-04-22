@@ -125,4 +125,61 @@ updated: 2026-04-21
     expect(writtenContent).toContain("contentType: article");
     expect(writtenContent).toContain(`![重建配图](/project-assets/${slug}/essay-cover.png)`);
   });
+
+  it("preserves structured frontmatter fields for published notes", async () => {
+    const obsidianRoot = await createTempDir("obsidian-publishing-");
+    const sourceDir = path.join(obsidianRoot, "网站发布");
+    const contentDir = path.join(obsidianRoot, "site-content");
+    const assetDir = path.join(obsidianRoot, "public-assets");
+
+    await mkdir(sourceDir, { recursive: true });
+    await writeFile(
+      path.join(sourceDir, "HandiCard.md"),
+      `---
+title: HandiCard
+publish: true
+contentType: project
+statusLabel: MVP
+slug: handicard
+updated: 2026-04-22
+description: 一个面向海外手帐用户的 AI 内页生成与作品分享平台。
+summary: 用 AI 快速生成可打印的手帐内页卡片，并让用户在 Gallery 里发现、复用和再创作别人的作品。
+stage: 结构和功能边界已经明确，处于 MVP 推进阶段。
+metrics:
+  - label: 方向
+    value: AI × 手帐
+  - label: 形态
+    value: Web
+  - label: 重点
+    value: Generator + Gallery
+keyPoints:
+  - 目标不是做一个花哨工具，而是先打通生成、预览、导出、分享这条闭环。
+  - 参考 Leonardo.ai、Canva 和 Pinterest，但会更垂直地服务手帐场景。
+closing: 这是一个还在长出来的项目，但方向已经很清楚了。
+---
+
+## 项目定位
+
+HandiCard 面向的是海外手帐用户。
+`,
+    );
+
+    await syncObsidianSiteContent({
+      sourceDir,
+      contentDir,
+      assetDir,
+      now: new Date("2026-04-22T00:00:00Z"),
+    });
+
+    const writtenContent = await readFile(path.join(contentDir, "handicard.md"), "utf8");
+    expect(writtenContent).toContain('description: "一个面向海外手帐用户的 AI 内页生成与作品分享平台。"');
+    expect(writtenContent).toContain('summary: "用 AI 快速生成可打印的手帐内页卡片，并让用户在 Gallery 里发现、复用和再创作别人的作品。"');
+    expect(writtenContent).toContain('stage: "结构和功能边界已经明确，处于 MVP 推进阶段。"');
+    expect(writtenContent).toContain("metrics:");
+    expect(writtenContent).toContain('  - label: "方向"');
+    expect(writtenContent).toContain('    value: "AI × 手帐"');
+    expect(writtenContent).toContain("keyPoints:");
+    expect(writtenContent).toContain('  - "目标不是做一个花哨工具，而是先打通生成、预览、导出、分享这条闭环。"');
+    expect(writtenContent).toContain('closing: "这是一个还在长出来的项目，但方向已经很清楚了。"');
+  });
 });
