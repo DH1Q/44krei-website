@@ -1,0 +1,100 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { skillHubData } from "../data/skills";
+
+const statusLabel = {
+  active: "当前使用",
+  draft: "草稿",
+  legacy: "旧版归档",
+};
+---
+
+<BaseLayout title={`${skillHubData.meta.title} | 44krei`} description={skillHubData.meta.description} activePath="/skills">
+  <div class="container">
+    <section class="skills-shell">
+      <a href="/" class="back-link">返回首页</a>
+
+      <div class="detail-hero">
+        <div class="hero-eyebrow">{skillHubData.hero.eyebrow}</div>
+        <h1 class="detail-title">{skillHubData.hero.title}</h1>
+        <p class="detail-summary">{skillHubData.hero.description}</p>
+      </div>
+
+      <section class="section-block compact-top">
+        <div class="section-title first">管理方式</div>
+        <div class="skill-management-grid">
+          {
+            skillHubData.management.map((item) => (
+              <article class="skill-panel">
+                <h2>{item.title}</h2>
+                <p>{item.description}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-title">Skills</div>
+        <div class="skill-card-stack">
+          {
+            skillHubData.skills.map((skill) => (
+              <article class:list={["skill-card", `status-${skill.status}`]}>
+                <div class="skill-card-head">
+                  <div>
+                    <div class="skill-domain">{skill.domain}</div>
+                    <h2>{skill.name}</h2>
+                  </div>
+                  <span class="skill-status">{statusLabel[skill.status]}</span>
+                </div>
+                <p>{skill.description}</p>
+                <div class="skill-subgrid">
+                  <div>
+                    <div class="skill-mini-title">什么时候用</div>
+                    <ul>
+                      {skill.useWhen.map((line) => <li>{line}</li>)}
+                    </ul>
+                  </div>
+                  <div>
+                    <div class="skill-mini-title">关键规则</div>
+                    <ul>
+                      {skill.rules.map((line) => <li>{line}</li>)}
+                    </ul>
+                  </div>
+                </div>
+                <a class="text-link skill-link" href={skill.repo} target="_blank" rel="noreferrer">GitHub →</a>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section-block section-padding-bottom">
+        <div class="section-title">工具项目</div>
+        <div class="skill-card-stack">
+          {
+            skillHubData.projects.map((project) => (
+              <article class="skill-card tool-card">
+                <div class="skill-card-head">
+                  <div>
+                    <div class="skill-domain">Tool Project</div>
+                    <h2>{project.name}</h2>
+                  </div>
+                  <span class="skill-status">{project.status}</span>
+                </div>
+                <p>{project.description}</p>
+                <div class="skill-tags">
+                  {project.tags.map((tag) => <span>{tag}</span>)}
+                </div>
+                <div class="skill-actions">
+                  <a class="text-link skill-link" href="/projects/krei-md">网站项目页 →</a>
+                  <a class="text-link skill-link" href={project.repo} target="_blank" rel="noreferrer">GitHub →</a>
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+    </section>
+  </div>
+</BaseLayout>
