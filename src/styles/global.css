@@ -705,6 +705,7 @@ canvas {
 .page-orbs {
   position: fixed;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
   z-index: 0;
 }
@@ -794,6 +795,10 @@ canvas {
   .list-row:hover {
     transform: none;
   }
+
+  .list-row::before {
+    inset: 0;
+  }
 }
 
 .skill-management-grid {
@@ -805,7 +810,7 @@ canvas {
 .skill-panel,
 .skill-card {
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-soft);
   background: rgba(255, 255, 255, 0.72);
   box-shadow: 0 14px 42px rgba(255, 140, 66, 0.05);
 }
@@ -835,6 +840,20 @@ canvas {
 .skill-card-stack {
   display: grid;
   gap: 14px;
+}
+
+.skill-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.skill-hero-actions .hero-cta,
+.skill-hero-actions .skill-link,
+.skill-actions .skill-primary-action {
+  margin-top: 0;
 }
 
 .skill-card {
@@ -926,6 +945,10 @@ canvas {
   margin-top: 2px;
 }
 
+.skill-primary-action {
+  flex: 0 0 auto;
+}
+
 @media (max-width: 720px) {
   .skill-management-grid,
   .skill-subgrid {
@@ -936,5 +959,8 @@ canvas {
   .skill-actions {
     display: grid;
   }
-}
 
+  .skill-hero-actions {
+    align-items: stretch;
+  }
+}

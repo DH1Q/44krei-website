@@ -17,9 +17,25 @@ describe("siteData", () => {
 
   it("keeps labels for the homepage sections", () => {
     expect(siteData.home.projectsTitle).toBeTruthy();
+    expect(siteData.home.skillHubTitle).toBe("Skill 库");
     expect(siteData.home.journeyTitle).toBeTruthy();
     expect(siteData.home.channelsTitle).toBeTruthy();
     expect(siteData.home.contactTitle).toBeTruthy();
+  });
+
+  it("keeps homepage shortcuts for the skill hub and Krei MD", () => {
+    expect(siteData.home.skillHubLinks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          title: "Skill 库",
+          href: "/skills",
+        }),
+        expect.objectContaining({
+          title: "Krei MD",
+          href: "/projects/krei-md/",
+        }),
+      ]),
+    );
   });
 
   it("provides direct contact info and social handles", () => {

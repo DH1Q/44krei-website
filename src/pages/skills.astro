@@ -18,6 +18,10 @@ const statusLabel = {
         <div class="hero-eyebrow">{skillHubData.hero.eyebrow}</div>
         <h1 class="detail-title">{skillHubData.hero.title}</h1>
         <p class="detail-summary">{skillHubData.hero.description}</p>
+        <div class="skill-hero-actions">
+          <a class="hero-cta" href="/projects/krei-md/">Krei MD 小票网页 →</a>
+          <a class="text-link skill-link" href="#skill-list">查看 GitHub Skills →</a>
+        </div>
       </div>
 
       <section class="section-block compact-top">
@@ -34,7 +38,7 @@ const statusLabel = {
         </div>
       </section>
 
-      <section class="section-block">
+      <section class="section-block" id="skill-list">
         <div class="section-title">Skills</div>
         <div class="skill-card-stack">
           {
@@ -87,7 +91,7 @@ const statusLabel = {
                   {project.tags.map((tag) => <span>{tag}</span>)}
                 </div>
                 <div class="skill-actions">
-                  <a class="text-link skill-link" href="/projects/krei-md">网站项目页 →</a>
+                  <a class="hero-cta skill-primary-action" href={project.siteHref}>Krei MD 小票网页 →</a>
                   <a class="text-link skill-link" href={project.repo} target="_blank" rel="noreferrer">GitHub →</a>
                 </div>
               </article>
