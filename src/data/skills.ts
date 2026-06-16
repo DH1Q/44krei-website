@@ -11,6 +11,7 @@ export interface SkillItem {
 
 export interface ToolProjectItem {
   name: string;
+  siteHref: string;
   repo: string;
   description: string;
   status: string;
@@ -88,6 +89,7 @@ export const skillHubData = {
   projects: [
     {
       name: "Krei MD",
+      siteHref: "/projects/krei-md/",
       repo: "https://github.com/DH1Q/krei-md",
       description:
         "面向个人写作发布、公众号排版和 GP-M322 小票打印的 Markdown 编辑器，也是 Hermes 出票系统的本地控制台。",

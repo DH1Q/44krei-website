@@ -21,7 +21,9 @@ const { activePath = "/" } = Astro.props;
       <a href="/about" class:list={["nav-link", { active: activePath === "/about" }]}>
         {siteData.nav.aboutLabel}
       </a>
-      <a href="/skills" class:list={["nav-link", { active: activePath === "/skills" }]}>Skills</a>
+      <a href="/skills" class:list={["nav-link", { active: activePath === "/skills" }]}>
+        {siteData.nav.skillsLabel}
+      </a>
       <button class="button-shimmer" data-open-contact>
         {siteData.nav.contactLabel}
       </button>

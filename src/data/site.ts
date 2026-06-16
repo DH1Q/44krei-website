@@ -17,6 +17,14 @@ export interface ChannelItem {
   tag: string;
 }
 
+export interface SkillHubLinkItem {
+  icon: string;
+  title: string;
+  description: string;
+  href: string;
+  tag: string;
+}
+
 export const siteData = {
   meta: {
     title: "44krei | 邓又齐的实验现场",
@@ -26,6 +34,7 @@ export const siteData = {
   nav: {
     homeLabel: "首页",
     aboutLabel: "关于",
+    skillsLabel: "技能库",
     contactLabel: "联系",
     badgeLabel: "我是 44krei",
   },
@@ -38,6 +47,23 @@ export const siteData = {
       cta: "聊聊项目 →",
     },
     projectsTitle: "作品 / 项目",
+    skillHubTitle: "Skill 库",
+    skillHubLinks: [
+      {
+        icon: "⌘",
+        title: "Skill 库",
+        description: "把 GitHub 上分散的 skills 收到一个总览里，按场景、状态和入口管理。",
+        href: "/skills",
+        tag: "总览",
+      },
+      {
+        icon: "▤",
+        title: "Krei MD",
+        description: "小票网页和 Markdown 工作台入口，点进去看 Krei MD 的项目页。",
+        href: "/projects/krei-md/",
+        tag: "小票网页",
+      },
+    ] satisfies SkillHubLinkItem[],
     journeyTitle: "轨迹",
     channelsTitle: "账号",
     contactTitle: "联系我",
@@ -150,6 +176,7 @@ export const siteData = {
     links: [
       { label: "首页", href: "/" },
       { label: "关于", href: "/about" },
+      { label: "技能库", href: "/skills" },
       { label: "项目", href: "/#projects" },
     ],
   },
